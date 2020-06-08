@@ -4,11 +4,9 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 class PromptInfo {
 
@@ -18,6 +16,9 @@ class PromptInfo {
     private static final String DESCRIPTION = "description";
     private static final String FALLBACK_BUTTON_TITLE = "fallbackButtonTitle";
     private static final String CANCEL_BUTTON_TITLE = "cancelButtonTitle";
+    private static final String LOAD_SECRET = "loadSecret";
+    private static final String INVALIDATE_ON_ENROLLMENT = "invalidateOnEnrollment";
+    private static final String SECRET = "secret";
     private static final String CONFIRMATION_REQUIRED = "confirmationRequired";
 
     private Bundle bundle = new Bundle();
@@ -50,6 +51,17 @@ class PromptInfo {
         return bundle.getString(CANCEL_BUTTON_TITLE);
     }
 
+    String getSecret() {
+        return bundle.getString(SECRET);
+    }
+
+    boolean loadSecret() {
+        return bundle.getBoolean(LOAD_SECRET);
+    }
+
+    boolean invalidateOnEnrollment() {
+        return bundle.getBoolean(INVALIDATE_ON_ENROLLMENT);
+
     boolean getConfirmationRequired() {
         return bundle.getBoolean(CONFIRMATION_REQUIRED);
     }
@@ -63,6 +75,9 @@ class PromptInfo {
         private String description = null;
         private String fallbackButtonTitle = "Use backup";
         private String cancelButtonTitle = "Cancel";
+        private boolean loadSecret = false;
+        private boolean invalidateOnEnrollment = false;
+        private String secret = null;
         private boolean confirmationRequired = true;
 
         Builder(Context context) {
@@ -94,12 +109,27 @@ class PromptInfo {
             bundle.putString(DESCRIPTION, this.description);
             bundle.putString(FALLBACK_BUTTON_TITLE, this.fallbackButtonTitle);
             bundle.putString(CANCEL_BUTTON_TITLE, this.cancelButtonTitle);
+            bundle.putString(SECRET, this.secret);
             bundle.putBoolean(DISABLE_BACKUP, this.disableBackup);
+            bundle.putBoolean(INVALIDATE_ON_ENROLLMENT, this.invalidateOnEnrollment);
+            bundle.putBoolean(LOAD_SECRET, this.loadSecret);
             bundle.putBoolean(CONFIRMATION_REQUIRED, this.confirmationRequired);
             promptInfo.bundle = bundle;
 
             return promptInfo;
         }
+
+        void parseArgs(JSONArray jsonArgs) throws JSONException {
+            Args args = new Args(jsonArgs);
+            disableBackup = args.getBoolean(DISABLE_BACKUP, disableBackup);
+            title = args.getString(TITLE, title);
+            subtitle = args.getString(SUBTITLE, subtitle);
+            description = args.getString(DESCRIPTION, description);
+            fallbackButtonTitle = args.getString(FALLBACK_BUTTON_TITLE, "Use Backup");
+            cancelButtonTitle = args.getString(CANCEL_BUTTON_TITLE, "Cancel");
+            loadSecret = args.getBoolean(LOAD_SECRET, false);
+            invalidateOnEnrollment = args.getBoolean(INVALIDATE_ON_ENROLLMENT, false);
+            secret = args.getString(SECRET, null);
 
         void parseArgs(JSONArray args) {
             JSONObject argsObject;

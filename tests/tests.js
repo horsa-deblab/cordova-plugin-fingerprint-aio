@@ -75,4 +75,48 @@ exports.defineManualTests = function (contentEl, createActionButton) {
       alert("Authentication invalid " + JSON.stringify(err));
     }
   });
+
+  createActionButton("Save secret", function () {
+    Fingerprint.show({
+      secret: "secret"
+    }, successCallback, errorCallback);
+
+    function successCallback() {
+      alert("Secret saved successfully");
+    }
+
+    function errorCallback(err) {
+      alert("Error while saving secret: " + JSON.stringify(err));
+    }
+  });
+
+  createActionButton("Save secret (invalidate on enrollment)", function () {
+    Fingerprint.show({
+      secret: "secret",
+      invalidateOnEnrollment: true
+    }, successCallback, errorCallback);
+
+    function successCallback() {
+      alert("Secret saved successfully");
+    }
+
+    function errorCallback(err) {
+      alert("Error while saving secret: " + JSON.stringify(err));
+    }
+  });
+
+  createActionButton("Load secret", function () {
+    Fingerprint.show({
+      disableBackup: true,
+      loadSecret: true,
+    }, successCallback, errorCallback);
+
+    function successCallback(secret) {
+      alert("Secret loaded successfully: " + secret);
+    }
+
+    function errorCallback(err) {
+      alert("Error while loading secret: " + JSON.stringify(err));
+    }
+  });
 };

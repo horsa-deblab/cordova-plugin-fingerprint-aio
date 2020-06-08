@@ -20,10 +20,12 @@ import org.json.JSONObject;
 public class Fingerprint extends CordovaPlugin {
 
     private static final String TAG = "Fingerprint";
-    private CallbackContext mCallbackContext = null;
-
     private static final int REQUEST_CODE_BIOMETRIC = 1;
+
+    private CallbackContext mCallbackContext = null;
     private PromptInfo.Builder mPromptInfoBuilder;
+
+    static final String SECRET_EXTRA = "secret";
 
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
         super.initialize(cordova, webView);
@@ -36,15 +38,14 @@ public class Fingerprint extends CordovaPlugin {
         this.mCallbackContext = callbackContext;
         Log.v(TAG, "Fingerprint action: " + action);
 
-        if (action.equals("authenticate")) {
+        if ("authenticate".equals(action)) {
             executeAuthenticate(args);
             return true;
 
-        } else if (action.equals("isAvailable")){
+        } else if ("isAvailable".equals(action)) {
             executeIsAvailable();
             return true;
         }
-
         return false;
     }
 
@@ -66,7 +67,12 @@ public class Fingerprint extends CordovaPlugin {
             return;
         }
         cordova.getActivity().runOnUiThread(() -> {
-            mPromptInfoBuilder.parseArgs(args);
+            try {
+                mPromptInfoBuilder.parseArgs(args);
+            } catch (JSONException e) {
+                sendError(PluginError.BIOMETRIC_ARGS_PARSING_FAILED);
+                return;
+            }
             Intent intent = new Intent(cordova.getActivity().getApplicationContext(), BiometricActivity.class);
             intent.putExtras(mPromptInfoBuilder.build().getBundle());
             this.cordova.startActivityForResult(this, intent, REQUEST_CODE_BIOMETRIC);
@@ -82,9 +88,23 @@ public class Fingerprint extends CordovaPlugin {
         if (requestCode != REQUEST_CODE_BIOMETRIC) {
             return;
         }
-        if (resultCode == Activity.RESULT_OK) {
+        if (resultCode != Activity.RESULT_OK) {
+            sendError(intent);
+            return;
+        }
+        sendSuccess(intent);
+    }
+
+    private void sendSuccess(Intent intent) {
+        if (intent != null && intent.getExtras() != null) {
+            sendSuccess(intent.getExtras().getString(SECRET_EXTRA));
+        } else {
             sendSuccess("biometric_success");
-        } else if (intent != null) {
+        }
+    }
+
+    private void sendError(Intent intent) {
+        if (intent != null) {
             Bundle extras = intent.getExtras();
             sendError(extras.getInt("code"), extras.getString("message"));
         } else {
@@ -100,6 +120,7 @@ public class Fingerprint extends CordovaPlugin {
                 return PluginError.BIOMETRIC_HARDWARE_NOT_SUPPORTED;
             case BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED:
                 return PluginError.BIOMETRIC_NOT_ENROLLED;
+            case BiometricManager.BIOMETRIC_SUCCESS:
             default:
                 return null;
         }

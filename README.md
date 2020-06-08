@@ -117,6 +117,9 @@ Fingerprint.show({
      * Android: `"Use Backup"` (Because backup could be anything pin/pattern/password ..haven't figured out a reliable way to determine lock type yet [source](https://stackoverflow.com/questions/7768879/check-whether-lock-was-enabled-or-not/18720287))
 * __disableBackup__: If `true` remove backup option on authentication dialogue. Default: `false`. This is useful if you want to implement your own fallback.
 * __cancelButtonTitle__: For cancel button on Android
+* __secret__: String secret to encrypt and save
+* __loadSecret__: If `true` previously saved secret will be loaded as a result of successful authentication.
+* __invalidateOnEnrollment__: If `true` secret will be deleted when biometry items are deleted or enrolled 
 * __confirmationRequired__ (**Android**): If `false` user confirmation is NOT required after a biometric has been authenticated . Default: `true`. See [docs](https://developer.android.com/training/sign-in/biometric-auth#no-explicit-user-action).
 
 ### Constants
@@ -133,6 +136,7 @@ Fingerprint.show({
 - **BIOMETRIC_SCREEN_GUARD_UNSECURED** = `-110`;
 - **BIOMETRIC_LOCKED_OUT** = `-111`;
 - **BIOMETRIC_LOCKED_OUT_PERMANENT** = `-112`;
+- **BIOMETRIC_SECRET_NOT_FOUND** = `-113`;
 ***
 
 Thanks to the authors of the original fingerprint plugins

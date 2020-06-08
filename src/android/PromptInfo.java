@@ -19,6 +19,7 @@ class PromptInfo {
     private static final String LOAD_SECRET = "loadSecret";
     private static final String INVALIDATE_ON_ENROLLMENT = "invalidateOnEnrollment";
     private static final String SECRET = "secret";
+    private static final String CONFIRMATION_REQUIRED = "confirmationRequired";
 
     private Bundle bundle = new Bundle();
 
@@ -60,6 +61,9 @@ class PromptInfo {
 
     boolean invalidateOnEnrollment() {
         return bundle.getBoolean(INVALIDATE_ON_ENROLLMENT);
+
+    boolean getConfirmationRequired() {
+        return bundle.getBoolean(CONFIRMATION_REQUIRED);
     }
 
     public static final class Builder {
@@ -74,6 +78,7 @@ class PromptInfo {
         private boolean loadSecret = false;
         private boolean invalidateOnEnrollment = false;
         private String secret = null;
+        private boolean confirmationRequired = true;
 
         Builder(Context context) {
             PackageManager packageManager = context.getPackageManager();
@@ -108,6 +113,7 @@ class PromptInfo {
             bundle.putBoolean(DISABLE_BACKUP, this.disableBackup);
             bundle.putBoolean(INVALIDATE_ON_ENROLLMENT, this.invalidateOnEnrollment);
             bundle.putBoolean(LOAD_SECRET, this.loadSecret);
+            bundle.putBoolean(CONFIRMATION_REQUIRED, this.confirmationRequired);
             promptInfo.bundle = bundle;
 
             return promptInfo;
@@ -124,6 +130,45 @@ class PromptInfo {
             loadSecret = args.getBoolean(LOAD_SECRET, false);
             invalidateOnEnrollment = args.getBoolean(INVALIDATE_ON_ENROLLMENT, false);
             secret = args.getString(SECRET, null);
+
+        void parseArgs(JSONArray args) {
+            JSONObject argsObject;
+            try {
+                argsObject = args.getJSONObject(0);
+            } catch (JSONException e) {
+                Log.e(TAG, "Can't parse args. Defaults will be used.", e);
+                return;
+            }
+            disableBackup = getBooleanArg(argsObject, DISABLE_BACKUP, disableBackup);
+            title = getStringArg(argsObject, TITLE, title);
+            subtitle = getStringArg(argsObject, SUBTITLE, subtitle);
+            description = getStringArg(argsObject, DESCRIPTION, description);
+            fallbackButtonTitle = getStringArg(argsObject, FALLBACK_BUTTON_TITLE, "Use Backup");
+            cancelButtonTitle = getStringArg(argsObject, CANCEL_BUTTON_TITLE, "Cancel");
+            confirmationRequired = getBooleanArg(argsObject, CONFIRMATION_REQUIRED, confirmationRequired);
+        }
+
+        private Boolean getBooleanArg(JSONObject argsObject, String name, Boolean defaultValue) {
+            if (argsObject.has(name)){
+                try {
+                    return argsObject.getBoolean(name);
+                } catch (JSONException e) {
+                    Log.e(TAG, "Can't parse '" + name + "'. Default will be used.", e);
+                }
+            }
+            return defaultValue;
+        }
+
+        private String getStringArg(JSONObject argsObject, String name, String defaultValue) {
+            if (argsObject.optString(name) != null
+                    && !argsObject.optString(name).isEmpty()){
+                try {
+                    return argsObject.getString(name);
+                } catch (JSONException e) {
+                    Log.e(TAG, "Can't parse '" + name + "'. Default will be used.", e);
+                }
+            }
+            return defaultValue;
         }
     }
 }

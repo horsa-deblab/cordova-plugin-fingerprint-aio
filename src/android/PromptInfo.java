@@ -4,9 +4,11 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 class PromptInfo {
 
@@ -60,7 +62,8 @@ class PromptInfo {
     }
 
     boolean invalidateOnEnrollment() {
-        return bundle.getBoolean(INVALIDATE_ON_ENROLLMENT);
+      return bundle.getBoolean(INVALIDATE_ON_ENROLLMENT);
+    }
 
     boolean getConfirmationRequired() {
         return bundle.getBoolean(CONFIRMATION_REQUIRED);
@@ -120,32 +123,16 @@ class PromptInfo {
         }
 
         void parseArgs(JSONArray jsonArgs) throws JSONException {
-            Args args = new Args(jsonArgs);
-            disableBackup = args.getBoolean(DISABLE_BACKUP, disableBackup);
-            title = args.getString(TITLE, title);
-            subtitle = args.getString(SUBTITLE, subtitle);
-            description = args.getString(DESCRIPTION, description);
-            fallbackButtonTitle = args.getString(FALLBACK_BUTTON_TITLE, "Use Backup");
-            cancelButtonTitle = args.getString(CANCEL_BUTTON_TITLE, "Cancel");
-            loadSecret = args.getBoolean(LOAD_SECRET, false);
-            invalidateOnEnrollment = args.getBoolean(INVALIDATE_ON_ENROLLMENT, false);
-            secret = args.getString(SECRET, null);
-
-        void parseArgs(JSONArray args) {
-            JSONObject argsObject;
-            try {
-                argsObject = args.getJSONObject(0);
-            } catch (JSONException e) {
-                Log.e(TAG, "Can't parse args. Defaults will be used.", e);
-                return;
-            }
-            disableBackup = getBooleanArg(argsObject, DISABLE_BACKUP, disableBackup);
-            title = getStringArg(argsObject, TITLE, title);
-            subtitle = getStringArg(argsObject, SUBTITLE, subtitle);
-            description = getStringArg(argsObject, DESCRIPTION, description);
-            fallbackButtonTitle = getStringArg(argsObject, FALLBACK_BUTTON_TITLE, "Use Backup");
-            cancelButtonTitle = getStringArg(argsObject, CANCEL_BUTTON_TITLE, "Cancel");
-            confirmationRequired = getBooleanArg(argsObject, CONFIRMATION_REQUIRED, confirmationRequired);
+          Args args = new Args(jsonArgs);
+          disableBackup = args.getBoolean(DISABLE_BACKUP, disableBackup);
+          title = args.getString(TITLE, title);
+          subtitle = args.getString(SUBTITLE, subtitle);
+          description = args.getString(DESCRIPTION, description);
+          fallbackButtonTitle = args.getString(FALLBACK_BUTTON_TITLE, "Use Backup");
+          cancelButtonTitle = args.getString(CANCEL_BUTTON_TITLE, "Cancel");
+          loadSecret = args.getBoolean(LOAD_SECRET, false);
+          invalidateOnEnrollment = args.getBoolean(INVALIDATE_ON_ENROLLMENT, false);
+          secret = args.getString(SECRET, null);
         }
 
         private Boolean getBooleanArg(JSONObject argsObject, String name, Boolean defaultValue) {
